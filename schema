@@ -2,9 +2,9 @@
 
 			--------------------
 			|					|
-			|		Main		|	 
-			|					|--------| Trader
-			|-------------------|
+Assets------|		Main		|	 	 |--------|
+			|					|--------| Trader |
+			|-------------------|		 |--------|
 			/		|			\
 		   /		|			 \
 		  /			|			  \
@@ -12,4 +12,12 @@
 	Logger		  Advisor			DataIO
 					|					|
 					|					|
-				  Algorithms		  Input Set	  
+				  Algorithms		  Input Set
+				  
+				  
+Main: Inits all the classes and sets thing in motion
+Assets: Handles your money
+Trader: Handles trades with the exchanges
+Logger: Listens for events and outputs them
+Advisor: Takes in candle data and outputs a decision
+DataIO: Handles data input and output between online/offline data
