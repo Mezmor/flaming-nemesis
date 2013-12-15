@@ -1,0 +1,15 @@
+
+
+			--------------------
+			|					|
+			|		Main		|	 
+			|					|--------| Trader
+			|-------------------|
+			/		|			\
+		   /		|			 \
+		  /			|			  \
+		 /			|			   \
+	Logger		  Advisor			DataIO
+					|					|
+					|					|
+				  Algorithms		  Input Set	  
