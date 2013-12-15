@@ -1,10 +1,11 @@
 // config.js
 
 // Optional log file.  Uncomment to use.
-//config.outfile = "outfile.log"
+config.outfile = "outfile.log"
 
 // Set what mode we're using
 config.mode = backtest;
+
 
 // backtest mode
 var backtest = {
@@ -31,6 +32,6 @@ var liveTrade = {
 
 // backtest-specific supplementatl config options
 config.backtest = {
-  pullNew: true
+  pullNew: true,
   candleRanges: [60,900,3600,14400,86400]
 }
