@@ -1,6 +1,7 @@
 {
 	"name": "nemesis",
 	"version": "0.0.1",
+	"main": "nemesis.js",
 	"description": "A bitcoin trading bot for testing algorithms",
 	"dependencies": {
 		"lodash": "2.x",

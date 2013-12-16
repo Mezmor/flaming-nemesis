@@ -1,9 +1,10 @@
 // config.js
+var path = require("path");
 
 var config = {};
 
 // Optional log file.  Uncomment to use.
-config.outfile = "outfile.log";
+config.outfile = path.resolve(__dirname, "outfile.log").toString();
 
 // Set what mode we're using
 config.mode = backtest;
