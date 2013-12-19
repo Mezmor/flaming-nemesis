@@ -6,32 +6,31 @@ var config = {};
 // Optional log file.  Uncomment to use.
 config.outfile = path.resolve(__dirname, "outfile.log").toString();
 
-// Set what mode we're using
-config.mode = backtest;
-
-
 // backtest mode
 var backtest = {
-  dataIO: "historicalIO",
+  data: "historical",
   advisor: "EMA",
   trader: "dummyTrader"
 };
 
-// live monitor mode
-// reads live data but does not do rela trades
+//live monitor mode
+//reads live data but does not do rela trades
 var liveMonitor = {
-  dataIO: "liveIO",
-  advisor: "EMA",
-  trader: "dummyTrader"
+data: "live",
+advisor: "EMA",
+trader: "dummyTrader"
 };
 
-// live trade mode
-// reads live data, makes real trades
+//live trade mode
+//reads live data, makes real trades
 var liveTrade = {
-  dataIO: "liveIO",
-  advisor: "EMA",
-  trader: "realTrader"
+data: "live",
+advisor: "EMA",
+trader: "realTrader"
 };
+
+//Set what mode we're using, needs to be after backtest declaration
+config.mode = backtest;
 
 // backtest-specific supplementatl config options
 config.backtest = {

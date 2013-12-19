@@ -4,8 +4,8 @@
 	"main": "nemesis.js",
 	"description": "A bitcoin trading bot for testing algorithms",
 	"dependencies": {
-		"lodash": "2.x",
-		"moment": "2.0.x"
+		"lodash": "*",
+		"winston": "*"
 	},
 	"repository": {
 		"type": "git",
