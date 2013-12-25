@@ -2,8 +2,6 @@
 // Driver responsible for reading in realtime transaction data and building variable length candles
 var EventEmitter = require('events').EventEmitter;
 
-//Expose the constructor
-module.exports = Live;
 
 // Constructor, we call EventEmitter's constructor because we subclass it
 var Live = function(datafile){
@@ -24,3 +22,6 @@ Live.prototype.__proto__ = EventEmitter.prototype;
 // pull live data from (bitcoincharts?)
 // convert trade data into candlestick data at different ranges
 // emit the "candle-found" event, listeners will act appropriately 
+
+//Expose the constructor
+module.exports = Live;

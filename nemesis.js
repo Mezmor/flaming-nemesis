@@ -16,7 +16,7 @@ winston.add(winston.transports.File, { filename: config.outfile });
 // Instantiate the appropriate dataIO driver
 var dataIO; 
 if(config.mode.data === "historical"){
-	dataIO = new Historical(config.outfile);
+	dataIO = new Historical(config.datafile);
 	console.log("Created new historical");
 } else {
 	// Instantiate the live driver
@@ -25,7 +25,7 @@ if(config.mode.data === "historical"){
 
 
 dataIO.on("start", function(){
-	console.log("event caught");
+	console.log("start event caught");
 });
 
 dataIO.start();

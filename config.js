@@ -6,6 +6,8 @@ var config = {};
 // Optional log file.  Uncomment to use.
 config.outfile = path.resolve(__dirname, "outfile.log").toString();
 
+config.datafile = path.resolve(__dirname, "data/mtgoxRUB.csv").toString();
+
 // backtest mode
 var backtest = {
   data: "historical",
@@ -31,6 +33,7 @@ trader: "realTrader"
 
 //Set what mode we're using, needs to be after backtest declaration
 config.mode = backtest;
+
 
 // backtest-specific supplementatl config options
 config.backtest = {
