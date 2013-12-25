@@ -4,7 +4,7 @@ var path = require("path");
 var config = {};
 
 // Optional log file.  Uncomment to use.
-config.outfile = path.resolve(__dirname, "outfile.log").toString();
+config.outfile = path.resolve(__dirname, "log.log").toString();
 
 config.datafile = path.resolve(__dirname, "data/mtgoxRUB.csv").toString();
 

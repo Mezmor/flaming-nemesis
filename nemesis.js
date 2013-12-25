@@ -25,7 +25,17 @@ if(config.mode.data === "historical"){
 
 
 dataIO.on("start", function(){
-	console.log("start event caught");
+	winston.info("start event caught");
+}).on("candle-1m", function(candle){
+	winston.info("Found 1m candle: " + JSON.stringify(candle));
+}).on("candle-15m", function(candle){
+	winston.info("Found 15m candle: " + JSON.stringify(candle));
+}).on("candle-1h", function(candle){
+	winston.info("Found 1h candle: " + JSON.stringify(candle));
+}).on("candle-4h", function(candle){
+	winston.info("Found 4h candle: " + JSON.stringify(candle));
+}).on("candle-24h", function(candle){
+	winston.info("Found 24h candle: " + JSON.stringify(candle));
 });
 
 dataIO.start();
