@@ -86,7 +86,8 @@ Historical.prototype.read = function(){
 			}
 		}
 		previousTransaction = currentTransaction;
-	};
+	}
+	this.emit("done");
 };
 
 // Initialize a candle with the currentTransaction

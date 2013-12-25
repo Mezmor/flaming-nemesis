@@ -23,19 +23,36 @@ if(config.mode.data === "historical"){
 	console.log("Created new realtime");
 }
 
+candleHistories = {
+		"1m": [],
+		"15m": [],
+		"1h": [],
+		"4h": [],
+		"24h": []
+};
 
 dataIO.on("start", function(){
 	winston.info("start event caught");
 }).on("candle-1m", function(candle){
 	winston.info("Found 1m candle: " + JSON.stringify(candle));
+	candleHistories["1m"].push(candle);
 }).on("candle-15m", function(candle){
 	winston.info("Found 15m candle: " + JSON.stringify(candle));
+	candleHistories["15m"].push(candle);
 }).on("candle-1h", function(candle){
 	winston.info("Found 1h candle: " + JSON.stringify(candle));
+	candleHistories["1h"].push(candle);
 }).on("candle-4h", function(candle){
 	winston.info("Found 4h candle: " + JSON.stringify(candle));
+	candleHistories["4h"].push(candle);
 }).on("candle-24h", function(candle){
 	winston.info("Found 24h candle: " + JSON.stringify(candle));
+	candleHistories["24h"].push(candle);
+}).on("done", function(){
+	console.log("Completed reading historical data");
+	for(var candleType in candleHistories){
+		console.log(candleType + ": " + candleHistories[candleType].length);
+	}
 });
 
 dataIO.start();
