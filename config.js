@@ -10,25 +10,25 @@ config.datafile = path.resolve(__dirname, "data/mtgoxRUB.csv").toString();
 
 // backtest mode
 var backtest = {
-  data: "historical",
-  advisor: "EMA",
-  trader: "dummyTrader"
+    data : "historical",
+    advisor : "EMA",
+    trader : "dummyTrader"
 };
 
-//live monitor mode
-//reads live data but does not do rela trades
+// live monitor mode
+// reads live data but does not do rela trades
 var liveMonitor = {
-data: "live",
-advisor: "EMA",
-trader: "dummyTrader"
+    data : "live",
+    advisor : "EMA",
+    trader : "dummyTrader"
 };
 
-//live trade mode
-//reads live data, makes real trades
+// live trade mode
+// reads live data, makes real trades
 var liveTrade = {
-data: "live",
-advisor: "EMA",
-trader: "realTrader"
+    data : "live",
+    advisor : "EMA",
+    trader : "realTrader"
 };
 
 //Set what mode we're using, needs to be after backtest declaration
