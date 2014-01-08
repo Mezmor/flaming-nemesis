@@ -37,7 +37,7 @@ config.mode = backtest;
 
 // backtest-specific supplementatl config options
 config.backtest = {
-  pullNew: true,
+  pullNew: false,
   candleRanges: [60,900,3600,14400,86400]
 };
 

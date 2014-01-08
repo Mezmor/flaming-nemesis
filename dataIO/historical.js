@@ -41,6 +41,9 @@ Historical.prototype.read = function() {
         "4h" : {},
         "24h" : {}
     };
+    
+    var previousTransaction = {};
+    
     for (var i = 0; i < array.length; i++) {
         var line = array[i].split(",");
         var currentTransaction = {
@@ -48,7 +51,10 @@ Historical.prototype.read = function() {
             "price" : line[1],
             "volume" : line[2]
         };
-        var previousTransaction = {}; // Initialized at the end of the loop
+        
+        if (!previousTransaction) {
+            previousTransaction = currentTransaction;
+        }
 
         // Update each candle
         for ( var candleType in candles) {

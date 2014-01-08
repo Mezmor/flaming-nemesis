@@ -12,6 +12,7 @@ var Historical = require("./dataIO/historical");
 // Add file transport to winston, console is set by default
 // Current settings: log everything to console + file
 winston.add(winston.transports.File, { filename: config.outfile });
+winston.remove(winston.transports.Console);
 
 // Instantiate the appropriate dataIO driver
 var dataIO;
@@ -53,6 +54,8 @@ dataIO.on("start", function() {
     for ( var candleType in candleHistories) {
         console.log(candleType + ": " + candleHistories[candleType].length);
     }
+    console.log(candleHistories["1m"][0]);
 });
 
 dataIO.start();
+
