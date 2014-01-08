@@ -42,23 +42,18 @@ Historical.prototype.read = function() {
         "24h" : {}
     };
     
-    var previousTransaction = {};
-    
     for (var i = 0; i < array.length; i++) {
         var line = array[i].split(",");
         var currentTransaction = {
-            "time" : line[0],
-            "price" : line[1],
-            "volume" : line[2]
+            "time" : parseInt(line[0]),
+            "price" : parseFloat(line[1]),
+            "volume" : parseFloat(line[2])
         };
-        
-        if (!previousTransaction) {
-            previousTransaction = currentTransaction;
-        }
 
         // Update each candle
         for ( var candleType in candles) {
             var candle = candles[candleType];
+            
             if (!candle.start) {
                 // This is a new candle!
                 initData(candle, currentTransaction);
@@ -67,48 +62,28 @@ Historical.prototype.read = function() {
                 // We don't add the currentTransaction to the current candle
                 // Otherwise we add the current transaction data to the candle
                 var timeDelta = currentTransaction.time - candle.start;
-//                console.log(candleType + ": " + timeDelta);
                 if ((timeDelta > 86400) & (candleType === "24h")) {
-                    candle.close = previousTransaction.price; // Close is the
-                                                                // last
-                                                                // transaction's
-                                                                // price
                     this.emit("candle-24h", candle);
-                    candles[candleType] = {};
+                    candle = candles[candleType] = {};
                     initData(candle, currentTransaction);
                 } else if ((timeDelta > 14400) & (candleType === "4h")) {
-                    candle.close = previousTransaction.price; // Close is the
-                                                                // last
-                                                                // transaction's
-                                                                // price
                     this.emit("candle-4h", candle);
-                    candles[candleType] = {};
+                    candle = candles[candleType] = {};
                     initData(candle, currentTransaction);
                 } else if ((timeDelta > 3600) & (candleType === "1h")) {
-                    candle.close = previousTransaction.price; // Close is the
-                                                                // last
-                                                                // transaction's
-                                                                // price
                     this.emit("candle-1h", candle);
-                    candles[candleType] = {};
+                    candle = candles[candleType] = {};
                     initData(candle, currentTransaction);
                 } else if ((timeDelta > 900) & (candleType === "15m")) {
-                    candle.close = previousTransaction.price; // Close is the
-                                                                // last
-                                                                // transaction's
-                                                                // price
                     this.emit("candle-15m", candle);
-                    candles[candleType] = {};
+                    candle = candles[candleType] = {};
                     initData(candle, currentTransaction);
-                } else if ((timeDelta > 60) & (candleType === "1m")) {
-                    candle.close = previousTransaction.price; // Close is the
-                                                                // last
-                                                                // transaction's
-                                                                // price
+                } else if ((timeDelta > 60) & (candleType == "1m")) {
                     this.emit("candle-1m", candle);
-                    candles[candleType] = {};
+                    candle = candles[candleType] = {};
                     initData(candle, currentTransaction);
                 } else {
+                    candle.close = currentTransaction.price;
                     // Add transaction data to candle
                     if (currentTransaction.price > candle.high) {
                         // This is a new high
@@ -120,7 +95,6 @@ Historical.prototype.read = function() {
                 }
             }
         }
-        previousTransaction = currentTransaction;
     }
     this.emit("done");
 };
@@ -128,7 +102,7 @@ Historical.prototype.read = function() {
 // Initialize a candle with the currentTransaction
 function initData(candle, currentTransaction) {
     candle.start = currentTransaction.time;
-    candle.open = currentTransaction.price;
+    candle.open = candle.close = currentTransaction.price;
     candle.high = candle.low = currentTransaction.price;
 };
 
