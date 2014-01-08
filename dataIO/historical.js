@@ -20,7 +20,8 @@ Historical.prototype.start = function() {
     // Begin reading data
     this.emit("start"); // Test emit
     if (config.backtest.pullNew || !fs.existsSync(this.data)) {
-        var dataURL = "http://api.bitcoincharts.com/v1/csv/" + this.data.split("\\").pop();
+        var dataURL = "http://api.bitcoincharts.com/v1/csv/" + 
+            this.data.split("\\").pop().split("/").pop();
         this.downloadData(dataURL, this.read.bind(this));
     } else {
         this.read();
@@ -29,7 +30,7 @@ Historical.prototype.start = function() {
 
 // Assumes the data to be structured as: (time, price, volume)
 Historical.prototype.read = function() {
-    winston.info("Using data file1 " + this.data);
+    winston.info("Using data file " + this.data);
     var array = fs.readFileSync(this.data).toString().split('\n');
     // Candles are: (1m [60s], 15m [900s], 1h [3600s], 4h [14400s], 24h
     // [86400s])
@@ -149,3 +150,4 @@ Historical.prototype.downloadData = function(file_url, cb) {
 
 //Expose the constructor
 module.exports = Historical;
+
