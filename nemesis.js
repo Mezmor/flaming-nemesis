@@ -4,6 +4,7 @@ var config = require("./config");
 var winston = require("winston");
 var Historical = require("./dataIO/historical");
 var Durin = require("./advisor/durin");
+var DummyTrader = require("./trader/dummy");
 
 // Init logger [check]
 // Init data-parser [check: historical only]
@@ -35,10 +36,9 @@ candleHistories = {
     "24h" : []
 };
 
-// TODO add a parameter that lets us know how far into the current time period
-// we are for each candle so we can use that as a weighting factor in advisor
-// calculations
-currentCandles = {};
+transactions = [];
+
+wallet = {};
 
 //
 //Instantiate the appropriate advisor
@@ -48,41 +48,54 @@ if (config.mode.advisor === "durin") {
     advisor = new Durin();
     console.log("Durin welcomes you into his lair");
 } else {
-    // Instantiate the live driver
     console.log("Unknown advisor");
 }
 
+//
+//Instantiate the appropriate trader
+//
+var trader;
+if (config.mode.trader === "dummyTrader") {
+  trader = new DummyTrader();
+  wallet.money = config.dummyTrader.initialMoney;
+  wallet.assets = config.dummyTrader.initialAssets;
+  console.log("Dummy trader initialized");
+} else {
+  console.log("Unknown trader");
+}
+
+
 dataIO.on("start", function() {
     winston.info("start event caught");
-}).on("new-data", function(candles) {
-    currentCandles = candles;
+}).on("new-data", function(currentTransaction) {
+    transactions.push(currentTransaction);
 }).on("candle-1m", function(candle) {
     winston.info("Found 1m candle: " + JSON.stringify(candle));
     candleHistories["1m"].push(candle);
-    advisor.advise(candleHistories, currentCandles, "1m");
+    trader.placeOrder(advisor.advise(candleHistories, "1m"), "1m", transactions, wallet);
 }).on("candle-15m", function(candle) {
     winston.info("Found 15m candle: " + JSON.stringify(candle));
     candleHistories["15m"].push(candle);
-    advisor.advise(candleHistories, currentCandles, "15m");
+    trader.placeOrder(advisor.advise(candleHistories, "15m"), "15m", transactions, wallet);
 }).on("candle-1h", function(candle) {
     winston.info("Found 1h candle: " + JSON.stringify(candle));
     candleHistories["1h"].push(candle);
-    advisor.advise(candleHistories, currentCandles, "1h");
+    trader.placeOrder(advisor.advise(candleHistories, "1h"), "1h", transactions, wallet);
 }).on("candle-4h", function(candle) {
     winston.info("Found 4h candle: " + JSON.stringify(candle));
     candleHistories["4h"].push(candle);
-    advisor.advise(candleHistories, currentCandles, "4h");
+    trader.placeOrder(advisor.advise(candleHistories, "4h"), "4h", transactions, wallet);
 }).on("candle-24h", function(candle) {
     winston.info("Found 24h candle: " + JSON.stringify(candle));
     candleHistories["24h"].push(candle);
-    advisor.advise(candleHistories, currentCandles, "24h");
+    trader.placeOrder(advisor.advise(candleHistories, "24h"), "24h", transactions, wallet);
 }).on("done", function() {
     console.log("Completed reading data");
     for ( var candleType in candleHistories) {
         console.log(candleType + ": " + candleHistories[candleType].length);
     }
     console.log(candleHistories["1m"][0]);  // TODO remove debug code
-    // Trader summarizes earnings here
+    console.log(wallet);
 });
 
 dataIO.start();

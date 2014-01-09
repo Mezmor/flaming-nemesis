@@ -8,7 +8,7 @@ var url = require('url');
 var http = require('http');
 
 // Constructor, we call EventEmitter's constructor because we subclass it
-var Historical = function(datafile, candles) {
+var Historical = function(datafile) {
     this.data = datafile;
     EventEmitter.call(this);
 };
@@ -85,6 +85,7 @@ Historical.prototype.read = function() {
                     initData(candle, currentTransaction);
                 } else {
                     candle.close = currentTransaction.price;
+                    candle.volume += currentTransaction.volume;
                     // Add transaction data to candle
                     if (currentTransaction.price > candle.high) {
                         // This is a new high
@@ -96,7 +97,7 @@ Historical.prototype.read = function() {
                 }
             }
         }
-        this.emit("new-data", candles);
+        this.emit("new-data", currentTransaction);
     }
     this.emit("done");
 };
@@ -106,6 +107,7 @@ function initData(candle, currentTransaction) {
     candle.start = currentTransaction.time;
     candle.open = candle.close = currentTransaction.price;
     candle.high = candle.low = currentTransaction.price;
+    candle.volume = currentTransaction.volume;
 };
 
 // Download data file from URL

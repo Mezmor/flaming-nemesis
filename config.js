@@ -16,7 +16,7 @@ var backtest = {
 };
 
 // live monitor mode
-// reads live data but does not do rela trades
+// reads live data but does not do real trades
 var liveMonitor = {
     data : "live",
     advisor : "durin",
@@ -31,14 +31,28 @@ var liveTrade = {
     trader : "realTrader"
 };
 
-//Set what mode we're using, needs to be after backtest declaration
+// Set what mode we're using, needs to be after backtest declaration
 config.mode = backtest;
 
-
-// backtest-specific supplementatl config options
+// backtest-specific supplemental config options
 config.backtest = {
-  pullNew: false,
-  candleRanges: [60,900,3600,14400,86400]
+    pullNew : false
+};
+
+// dummy trader options
+config.dummyTrader = {
+    initialMoney : 100000,
+    initialAssets : 6,
+    tradePercentages : {
+        "1m"  : 0.05,
+        "15m" : 0.10,
+        "1h"  : 0.15,
+        "4h"  : 0.25,
+        "24h" : 0.50
+    },
+    assetReservePercentage : 0.20,
+    fee : 0.02,
+    inefficiency : 0.05
 };
 
 module.exports = config;
