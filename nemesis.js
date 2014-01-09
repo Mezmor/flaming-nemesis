@@ -69,32 +69,50 @@ dataIO.on("start", function() {
     winston.info("start event caught");
 }).on("new-data", function(currentTransaction) {
     transactions.push(currentTransaction);
+    if (transactions.length > 100) {
+        transactions.shift();
+    }
 }).on("candle-1m", function(candle) {
     winston.info("Found 1m candle: " + JSON.stringify(candle));
     candleHistories["1m"].push(candle);
+    if (candleHistories["1m"].length > 100) {
+        candleHistories["1m"].shift();
+    }
     trader.placeOrder(advisor.advise(candleHistories, "1m"), "1m", transactions, wallet);
 }).on("candle-15m", function(candle) {
     winston.info("Found 15m candle: " + JSON.stringify(candle));
     candleHistories["15m"].push(candle);
+    if (candleHistories["15m"].length > 100) {
+        candleHistories["15m"].shift();
+    }
     trader.placeOrder(advisor.advise(candleHistories, "15m"), "15m", transactions, wallet);
 }).on("candle-1h", function(candle) {
     winston.info("Found 1h candle: " + JSON.stringify(candle));
     candleHistories["1h"].push(candle);
+    if (candleHistories["1h"].length > 100) {
+        candleHistories["1h"].shift();
+    }
     trader.placeOrder(advisor.advise(candleHistories, "1h"), "1h", transactions, wallet);
 }).on("candle-4h", function(candle) {
     winston.info("Found 4h candle: " + JSON.stringify(candle));
     candleHistories["4h"].push(candle);
+    if (candleHistories["4h"].length > 100) {
+        candleHistories["4h"].shift();
+    }
     trader.placeOrder(advisor.advise(candleHistories, "4h"), "4h", transactions, wallet);
 }).on("candle-24h", function(candle) {
     winston.info("Found 24h candle: " + JSON.stringify(candle));
     candleHistories["24h"].push(candle);
+    if (candleHistories["24h"].length > 100) {
+        candleHistories["24h"].shift();
+    }
     trader.placeOrder(advisor.advise(candleHistories, "24h"), "24h", transactions, wallet);
 }).on("done", function() {
     console.log("Completed reading data");
     for ( var candleType in candleHistories) {
         console.log(candleType + ": " + candleHistories[candleType].length);
     }
-    console.log(candleHistories["1m"][0]);  // TODO remove debug code
+    console.log(candleHistories["1m"][candleHistories["1m"].length - 1]);  // TODO remove debug code
     console.log(wallet);
 });
 

@@ -36,12 +36,18 @@ Durin.prototype.advise = function(candleHistories, timeLen) {
      * Else -> "hold"
      */
     var m = macdLine[macdLine.length - 1];
+    var m2 = macdLine[macdLine.length - 2];
+    var m3 = macdLine[macdLine.length - 3];
     var s = signalLine[signalLine.length - 1];
-    var deltaM = m - macdLine[macdLine.length - 2];
-    
-    if (s > 0 && m - s > 0.5*m && deltaM < 0) {
+    var deltaM = m - m2;
+    var deltaM2 = m2 - m3;
+    var price = candleHistory[candleHistory.length - 1].close;
+    var margin = 1.1;
+    if (s / price > 0.01 && m2 > s * margin && deltaM2 >= 0 && deltaM < 0) {
+        console.log([timeLen, m, s, deltaM]);
         advice = "sell";
-    } else if (s < 0 && m - s < 0.5*m && deltaM > 0) {
+    } else if (s / price < -0.01 && m2 < s * margin && deltaM2 <= 0 && deltaM > 0) {
+        console.log([timeLen, m, s, deltaM]);
         advice = "buy";
     } else {
         advice = "hold";
