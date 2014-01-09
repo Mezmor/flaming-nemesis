@@ -41,18 +41,18 @@ config.backtest = {
 
 // dummy trader options
 config.dummyTrader = {
-    initialMoney : 100000,
-    initialAssets : 6,
+    initialMoney : 0,
+    initialAssets : 3,
     tradePercentages : {
-        "1m"  : 0.05,
-        "15m" : 0.10,
-        "1h"  : 0.15,
-        "4h"  : 0.25,
-        "24h" : 0.50
+        "1m"  : 0.01,
+        "15m" : 0.05,
+        "1h"  : 0.10,
+        "4h"  : 0.20,
+        "24h" : 0.30
     },
     assetReservePercentage : 0.20,
     fee : 0.02,
-    inefficiency : 0.05
+    inefficiency : 0.01
 };
 
 module.exports = config;
