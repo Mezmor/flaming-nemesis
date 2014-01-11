@@ -12,6 +12,18 @@ var DummyTrader = function() {
     this.fee = config.dummyTrader.fee;
     this.inefficiency = config.dummyTrader.inefficiency;
     this.lastTrade = {};
+    this.positions = {
+        "1m" : [],
+        "15m" : [],
+        "1h" : [],
+        "4h" : [],
+        "24h" : []
+    };
+    this.maxPositions = 5;
+    this.cashMin = 1;
+    this.coinMin = 0.01;
+    this.heldMoney = 0;
+    this.heldAssets = 0;
     EventEmitter.call(this);
 };
 
@@ -19,34 +31,76 @@ var DummyTrader = function() {
 DummyTrader.prototype.__proto__ = EventEmitter.prototype;
 
 DummyTrader.prototype.placeOrder = function(action, timeLen, transactions, wallet) {
+    
+    var position = {
+        "type" : {},
+        "time" : {},
+        "price": {},
+        "volume": {}
+    };
 
     // winston.info([action, wallet.money, wallet.assets]);
-    var price = 0;
     switch (action) {
     case "buy":
-        var cash = wallet.money * this.tradePercentages[timeLen];
-        price = (1 + this.inefficiency)
-            * transactions[transactions.length - 1].price;
-        if (cash > 1
-            && (!this.lastTrade[timeLen] || (this.lastTrade[timeLen][0] == "sell" && this.lastTrade[timeLen][1] > price
-                * (1 + this.fee)))) {
-            wallet.money -= cash;
-            wallet.assets += cash / (price * (1 + this.fee));
-            this.lastTrade[timeLen] = [ "buy", price * (1 + this.fee) ];
-            console.log([ transactions[transactions.length - 1].time, action, price ]);
+        // calculate how much $ we want to spend on the buy
+        var coins;
+        var cash = (wallet.money - this.heldMoney) * this.tradePercentages[timeLen];
+        if (cash > this.cashMin) { // make sure this trade meets the minimum
+            var price = (1 + this.inefficiency) * (1 + this.fee)
+                * transactions[transactions.length - 1].price;
+            coins = cash / price;
+            
+            this.closeProfitPositions(price, wallet, timeLen);
+            
+            // TODO engage all stop-losses
+            // open a new position
+            if (this.positions[timeLen].length < this.maxPositions) {
+                // make trade
+                wallet.money -= cash;
+                wallet.assets += coins;
+                this.heldAssets += coins;
+                
+                // record position
+                position.type = "long";
+                position.time = transactions[transactions.length - 1].time;
+                position.price = price;
+                position.volume = coins;
+                this.positions[timeLen].push(position);
+                
+                console.log([ transactions[transactions.length - 1].time, action, cash, coins]);
+            }
         }
+
         break;
     case "sell":
-        price = (1 - this.inefficiency)
-            * transactions[transactions.length - 1].price;
-        var coins = wallet.assets * (1 - this.reservePercentage)
+        // calculate how many coins we want to sell
+        var coins = (wallet.assets - this.heldAssets) * (1 - this.reservePercentage)
             * this.tradePercentages[timeLen];
-        if (coins > 0.01 && (!this.lastTrade[timeLen] || (this.lastTrade[timeLen][0] == "buy"
-            && this.lastTrade[timeLen][1] < price * (1 - this.fee)))) {
-            wallet.money += coins * (1 - this.fee) * price;
-            wallet.assets -= coins;
-            this.lastTrade[timeLen] = [ "sell", price * (1 - this.fee) ];
-            console.log([ transactions[transactions.length - 1].time, action, price ]);
+        var cash;
+        if (coins > this.coinMin) {
+            var price = (1 - this.inefficiency) * (1 - this.fee)
+                * transactions[transactions.length - 1].price;
+            cash = coins * price;
+
+            this.closeProfitPositions(price, wallet, timeLen);
+            
+            // TODO engage all stop-losses
+            // open a new position
+            if (this.positions[timeLen].length < this.maxPositions) {
+                // make trade
+                wallet.money += cash;
+                wallet.assets -= coins;
+                this.heldMoney += cash;
+
+                //record position
+                position.type = "short";
+                position.time = transactions[transactions.length - 1].time;
+                position.price = price;
+                position.volume = coins;
+                this.positions[timeLen].push(position);
+                
+                console.log([ transactions[transactions.length - 1].time, action, cash, coins]);
+            }
         }
         break;
     case "hold":
@@ -54,8 +108,41 @@ DummyTrader.prototype.placeOrder = function(action, timeLen, transactions, walle
     }
     // TODO this logging should probably go to winston
     if (action != "hold") {
-//        console.log([ transactions[transactions.length - 1].time, action, price ]);
         console.log([wallet.money, wallet.assets]);
+//        console.log([this.heldMoney, this.heldAssets]);
+//        console.log(this.positions);
+    }
+};
+
+// Close all profitable positions
+DummyTrader.prototype.closeProfitPositions = function(price, wallet, timeLen) {
+    for (var i = 0; i < this.positions[timeLen].length; i++) {
+        p = this.positions[timeLen][i];
+        if (p.type == "long" && price > p.price) {
+            // close profitable long position (sell)
+            var coins = p.volume;
+            var cash = coins * price;
+            
+            wallet.money += cash;
+            wallet.assets -= coins;
+            this.heldAssets -= coins;
+            
+            var idx = this.positions[timeLen].indexOf(p);
+            this.positions[timeLen].splice(idx,1);
+            i--;
+        } else if (p.type == "short" && price < p.price) {
+            // close profitable short position (buy)
+            var cash = p.volume * p.price;
+            var coins = cash / price;
+            
+            wallet.money -= cash;
+            wallet.assets += coins;
+            this.heldMoney -= cash;
+            
+            var idx = this.positions[timeLen].indexOf(p);
+            this.positions[timeLen].splice(idx,1);
+            i--;
+        }
     }
 };
 

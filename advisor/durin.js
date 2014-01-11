@@ -42,12 +42,12 @@ Durin.prototype.advise = function(candleHistories, timeLen) {
     var deltaM = m - m2;
     var deltaM2 = m2 - m3;
     var price = candleHistory[candleHistory.length - 1].close;
-    var margin = 1.1;
+    var margin = 1.0;
     if (s / price > 0.01 && m2 > s * margin && deltaM2 >= 0 && deltaM < 0) {
-        console.log([timeLen, m, s, deltaM]);
+//        console.log([timeLen, m, s, deltaM]);
         advice = "sell";
     } else if (s / price < -0.01 && m2 < s * margin && deltaM2 <= 0 && deltaM > 0) {
-        console.log([timeLen, m, s, deltaM]);
+//        console.log([timeLen, m, s, deltaM]);
         advice = "buy";
     } else {
         advice = "hold";

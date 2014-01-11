@@ -40,6 +40,8 @@ transactions = [];
 
 wallet = {};
 
+initprice = 0;
+
 //
 //Instantiate the appropriate advisor
 //
@@ -69,6 +71,9 @@ dataIO.on("start", function() {
     winston.info("start event caught");
 }).on("new-data", function(currentTransaction) {
     transactions.push(currentTransaction);
+    if (initprice == 0) {
+        initprice = currentTransaction.price;
+    }
     if (transactions.length > 100) {
         transactions.shift();
     }
@@ -109,11 +114,13 @@ dataIO.on("start", function() {
     trader.placeOrder(advisor.advise(candleHistories, "24h"), "24h", transactions, wallet);
 }).on("done", function() {
     console.log("Completed reading data");
-    for ( var candleType in candleHistories) {
-        console.log(candleType + ": " + candleHistories[candleType].length);
-    }
+//    for ( var candleType in candleHistories) {
+//        console.log(candleType + ": " + candleHistories[candleType].length);
+//    }
     console.log(candleHistories["1m"][candleHistories["1m"].length - 1]);  // TODO remove debug code
     console.log(wallet);
+    console.log("start $" + (config.dummyTrader.initialMoney + config.dummyTrader.initialAssets * initprice));
+    console.log("end $" + (wallet.money + wallet.assets * candleHistories["1m"][candleHistories["1m"].length - 1].close));
 });
 
 dataIO.start();
