@@ -19,7 +19,7 @@ var DummyTrader = function() {
         "4h" : [],
         "24h" : []
     };
-    this.maxPositions = 5;
+    this.maxPositions = 10;
     this.cashMin = 1;
     this.coinMin = 0.01;
     this.heldMoney = 0;
@@ -68,6 +68,7 @@ DummyTrader.prototype.placeOrder = function(action, timeLen, transactions, walle
                 this.positions[timeLen].push(position);
                 
                 console.log([ transactions[transactions.length - 1].time, action, cash, coins]);
+                console.log([wallet.money, wallet.assets]);
             }
         }
 
@@ -100,6 +101,7 @@ DummyTrader.prototype.placeOrder = function(action, timeLen, transactions, walle
                 this.positions[timeLen].push(position);
                 
                 console.log([ transactions[transactions.length - 1].time, action, cash, coins]);
+                console.log([wallet.money, wallet.assets]);
             }
         }
         break;
@@ -107,11 +109,11 @@ DummyTrader.prototype.placeOrder = function(action, timeLen, transactions, walle
         break;
     }
     // TODO this logging should probably go to winston
-    if (action != "hold") {
-        console.log([wallet.money, wallet.assets]);
+//    if (action != "hold") {
+//        console.log([wallet.money, wallet.assets]);
 //        console.log([this.heldMoney, this.heldAssets]);
 //        console.log(this.positions);
-    }
+//    }
 };
 
 // Close all profitable positions
@@ -122,25 +124,25 @@ DummyTrader.prototype.closeProfitPositions = function(price, wallet, timeLen) {
             // close profitable long position (sell)
             var coins = p.volume;
             var cash = coins * price;
-            
+
             wallet.money += cash;
             wallet.assets -= coins;
             this.heldAssets -= coins;
-            
+
             var idx = this.positions[timeLen].indexOf(p);
-            this.positions[timeLen].splice(idx,1);
+            this.positions[timeLen].splice(idx, 1);
             i--;
         } else if (p.type == "short" && price < p.price) {
             // close profitable short position (buy)
             var cash = p.volume * p.price;
             var coins = cash / price;
-            
+
             wallet.money -= cash;
             wallet.assets += coins;
             this.heldMoney -= cash;
-            
+
             var idx = this.positions[timeLen].indexOf(p);
-            this.positions[timeLen].splice(idx,1);
+            this.positions[timeLen].splice(idx, 1);
             i--;
         }
     }

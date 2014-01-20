@@ -10,6 +10,7 @@ var http = require('http');
 // Constructor, we call EventEmitter's constructor because we subclass it
 var Historical = function(datafile) {
     this.data = datafile;
+    this.dateStr = config.backtest.startDate;
     EventEmitter.call(this);
 };
 
@@ -19,19 +20,26 @@ Historical.prototype.__proto__ = EventEmitter.prototype;
 Historical.prototype.start = function() {
     // Begin reading data
     this.emit("start"); // Test emit
+    
+    // Calculate starting date
+    var d = this.dateStr.split("-");
+    var startDate = new Date(d.shift(), parseInt(d.shift())-1, d.shift());
+    
+    // Pull new data file if we need to
     if (config.backtest.pullNew || !fs.existsSync(this.data)) {
         var dataURL = "http://api.bitcoincharts.com/v1/csv/" + 
             this.data.split("\\").pop().split("/").pop();
-        this.downloadData(dataURL, this.read.bind(this));
+        this.downloadData(dataURL, startDate, this.read.bind(this));
     } else {
-        this.read();
+        this.read(startDate);
     }
 };
 
 // Assumes the data to be structured as: (time, price, volume)
-Historical.prototype.read = function() {
+Historical.prototype.read = function(startDate) {
     winston.info("Using data file " + this.data);
     var array = fs.readFileSync(this.data).toString().split('\n');
+
     // Candles are: (1m [60s], 15m [900s], 1h [3600s], 4h [14400s], 24h
     // [86400s])
     // Candle: start, open, low, high, close
@@ -50,6 +58,10 @@ Historical.prototype.read = function() {
             "price" : parseFloat(line[1]),
             "volume" : parseFloat(line[2])
         };
+        
+        if (currentTransaction.time * 1000 < startDate.getTime()) {
+            continue;
+        }
         
         // Update each candle
         for ( var candleType in candles) {
@@ -112,7 +124,7 @@ function initData(candle, currentTransaction) {
 
 // Download data file from URL
 // code from http://www.hacksparrow.com/using-node-js-to-download-files.html
-Historical.prototype.downloadData = function(file_url, cb) {
+Historical.prototype.downloadData = function(file_url, startDate, cb) {
     winston.info("Downloading data file " + file_url);
     var downloadDir = 'data/';
 
@@ -140,7 +152,7 @@ Historical.prototype.downloadData = function(file_url, cb) {
             }).on('end', function() {
                 file.end();
                 winston.info(file_name + ' downloaded to ' + downloadDir);
-                cb();
+                cb(startDate);
             });
         });
     };

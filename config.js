@@ -36,7 +36,8 @@ config.mode = backtest;
 
 // backtest-specific supplemental config options
 config.backtest = {
-    pullNew : false
+    pullNew : false,
+    startDate: "2013-12-01"
 };
 
 // dummy trader options
@@ -44,11 +45,11 @@ config.dummyTrader = {
     initialMoney : 2000,
     initialAssets : 3,
     tradePercentages : {
-        "1m"  : 0.01,
-        "15m" : 0.05,
-        "1h"  : 0.10,
+        "1m"  : 0.80,
+        "15m" : 0.00,
+        "1h"  : 0.00,
         "4h"  : 0.20,
-        "24h" : 0.30
+        "24h" : 0.80
     },
     assetReservePercentage : 0.33,
     fee : 0.002,
