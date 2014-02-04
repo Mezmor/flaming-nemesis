@@ -1,18 +1,17 @@
 // Gandalf ain't got shit on me.
 
-var EventEmitter = require("events").EventEmitter;
+//var EventEmitter = require("events").EventEmitter;
 var config = require("../config");
 var winston = require("winston");
 var Math = require("../util/math");
 
 //Constructor, we call EventEmitter's constructor because we subclass it
 var Durin = function() {
-    math = new Math();
-    EventEmitter.call(this);
+//    EventEmitter.call(this);
 };
 
 // Inherit EventEmitter's prototype
-Durin.prototype.__proto__ = EventEmitter.prototype;
+//Durin.prototype.__proto__ = EventEmitter.prototype;
 
 Durin.prototype.advise = function(candleHistories, timeLen) {
     // based on current and historical candles, output a "buy" "sell" or "hold"
@@ -24,8 +23,8 @@ Durin.prototype.advise = function(candleHistories, timeLen) {
     var advice;
     var candleHistory = candleHistories[timeLen];
 
-    var macdLine = math.MACD(candleHistory, 12, 26);
-    var signalLine= math.EMA(macdLine, 9);
+    var macdLine = Math.MACD(candleHistory, 12, 26);
+    var signalLine= Math.EMA(macdLine, 9);
     
     /* If the signal line is above zero, the macd line is above the signal
      * line, and the slope aka delta of the macd line is negative -> "sell"

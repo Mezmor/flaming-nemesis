@@ -1,6 +1,6 @@
 // This trader just assumes that we were able to buy or sell at the last
 // transaction price +/- an inefficiency factor
-var EventEmitter = require("events").EventEmitter;
+//var EventEmitter = require("events").EventEmitter;
 var config = require("../config");
 var winston = require("winston");
 
@@ -24,11 +24,11 @@ var DummyTrader = function() {
     this.coinMin = 0.01;
     this.heldMoney = 0;
     this.heldAssets = 0;
-    EventEmitter.call(this);
+//    EventEmitter.call(this);
 };
 
 //Inherit EventEmitter's prototype
-DummyTrader.prototype.__proto__ = EventEmitter.prototype;
+//DummyTrader.prototype.__proto__ = EventEmitter.prototype;
 
 DummyTrader.prototype.placeOrder = function(action, timeLen, transactions, wallet) {
     

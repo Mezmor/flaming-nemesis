@@ -1,17 +1,17 @@
 // Math helper functions
-var EventEmitter = require("events").EventEmitter;
+//var EventEmitter = require("events").EventEmitter;
 var config = require("../config");
 var winston = require("winston");
 
 // Constructor, we call EventEmitter's constructor because we subclass it
-var Math = function() {
-    EventEmitter.call(this);
+function Math() {
+//    EventEmitter.call(this);
 };
 
 //Inherit EventEmitter's prototype
-Math.prototype.__proto__ = EventEmitter.prototype;
+//Math.prototype.__proto__ = EventEmitter.prototype;
 
-Math.prototype.MACD = function(candleHistory, short, long) {
+Math.MACD = function(candleHistory, short, long) {
     var closes = this.getClosePrices(candleHistory);
     var emaShort = this.EMA(closes, short);
     var emaLong = this.EMA(closes, long);
@@ -24,7 +24,7 @@ Math.prototype.MACD = function(candleHistory, short, long) {
     return macd;
 };
 
-Math.prototype.EMA = function(values, length) {
+Math.EMA = function(values, length) {
     var ema = [];
     var multiplier = (2 / (length + 1));
 
@@ -39,7 +39,7 @@ Math.prototype.EMA = function(values, length) {
     return ema;
 };
 
-Math.prototype.getClosePrices = function(candleHistory) {
+Math.getClosePrices = function(candleHistory) {
     var values = [];
     for (var i = 0; i < candleHistory.length; i++) {
         values[i] = candleHistory[i].close;

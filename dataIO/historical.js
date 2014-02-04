@@ -76,23 +76,23 @@ Historical.prototype.read = function(startDate) {
                 // Otherwise we add the current transaction data to the candle
                 var timeDelta = currentTransaction.time - candle.start;
                 if ((timeDelta > 86400) & (candleType === "24h")) {
-                    this.emit("candle-24h", candle);
+                    this.emit("candle", candle, "24h");
                     candle = candles[candleType] = {};
                     initData(candle, currentTransaction);
                 } else if ((timeDelta > 14400) & (candleType === "4h")) {
-                    this.emit("candle-4h", candle);
+                    this.emit("candle", candle, "4h");
                     candle = candles[candleType] = {};
                     initData(candle, currentTransaction);
                 } else if ((timeDelta > 3600) & (candleType === "1h")) {
-                    this.emit("candle-1h", candle);
+                    this.emit("candle", candle, "1h");
                     candle = candles[candleType] = {};
                     initData(candle, currentTransaction);
                 } else if ((timeDelta > 900) & (candleType === "15m")) {
-                    this.emit("candle-15m", candle);
+                    this.emit("candle", candle, "15m");
                     candle = candles[candleType] = {};
                     initData(candle, currentTransaction);
                 } else if ((timeDelta > 60) & (candleType == "1m")) {
-                    this.emit("candle-1m", candle);
+                    this.emit("candle", candle, "1m");
                     candle = candles[candleType] = {};
                     initData(candle, currentTransaction);
                 } else {
