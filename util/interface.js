@@ -8,20 +8,15 @@ var readJson = require("read-package-json");
 var prompt = require("prompt");
 var charm = require("charm")();
 var sprintf = require("sprintf-js").sprintf;
+var Nemesis = require("nemesis");
 
 // interactive interface
 function Iface() {
     // list of known commands
     this.commandList = {
-        "version" : {
-            "commandFunc" : version,
-            "commandDesc" : "print version",
-            "commandOpts" : null,
-            "commandShort": null
-        },
-        "quit" : {
-            "commandFunc" : quit,
-            "commandDesc" : "exit",
+        "bt" : {
+            "commandFunc" : backtest,
+            "commandDesc" : "backtest",
             "commandOpts" : null,
             "commandShort": null
         },
@@ -36,7 +31,19 @@ function Iface() {
             "commandDesc" : "print this help",
             "commandOpts" : null,
             "commandShort": null
-        }
+        },
+        "quit" : {
+            "commandFunc" : quit,
+            "commandDesc" : "exit",
+            "commandOpts" : null,
+            "commandShort": "q"
+        },
+        "version" : {
+            "commandFunc" : version,
+            "commandDesc" : "print version",
+            "commandOpts" : null,
+            "commandShort": null
+        },
     };
     
     // setup interface
@@ -70,6 +77,13 @@ function help(cb) {
     for (var c in this.commandList) {
         console.log(sprintf("  %-10s\t%s", c, this.commandList[c].commandDesc));
     }
+    cb();
+}
+
+function backtest(cb) {
+    console.log("backtest");
+    Nemess.InitBT();
+    dataIO.start();
     cb();
 }
 

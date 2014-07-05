@@ -7,29 +7,28 @@ var Historical = require("./dataIO/historical");
 var Durin = require("./advisor/durin");
 var DummyTrader = require("./trader/dummy");
 
-//
-// Global variables
-//
-var runmode = {};
-var dataIO = {};
-var advisor = {};
-var trader = {};
-var transactions = [];
-var wallet = {};
-var initprice = 0;
-var candleHistories = {
-    "1m" : [],
-    "15m" : [],
-    "1h" : [],
-    "4h" : [],
-    "24h" : []
+
+// constructor
+var Nemesis = function() {
+     var runmode = {};
+     var dataIO = {};
+     var advisor = {};
+     var trader = {};
+     var transactions = [];
+     var wallet = {};
+     var initprice = 0;
+     var candleHistories = {
+         "1m" : [],
+         "15m" : [],
+         "1h" : [],
+         "4h" : [],
+         "24h" : []
+     };
+     console.log("nem");
 };
 
-//
-// Global functions
-//
 // bind events to event handlers for data
-function setupDataEvents() {
+Nemesis.prototype.setupDataEvents = function() {
     dataIO.on("start", function() {
     //    winston.info("start event caught");
     }).on("new-data", function(currentTransaction) {
@@ -57,7 +56,7 @@ function setupDataEvents() {
         console.log("start $" + (config.dummyTrader.initialMoney + config.dummyTrader.initialAssets * initprice));
         console.log("end $" + (wallet.money + wallet.assets * candleHistories["1m"][candleHistories["1m"].length - 1].close));
     });
-}
+};
 
 // initialize nemesis
 function Init() {
@@ -71,7 +70,7 @@ function Init() {
 }
 
 // initialize everything for backtest
-function InitBT() {
+Nemesis.prototype.InitBT = function() {
     //
     // Instantiate the appropriate dataIO driver
     //
@@ -109,14 +108,23 @@ function InitBT() {
     // Handle events
     //
     setupDataEvents();
+};
+
+//
+// This is what gets run when this file is run as main
+//
+function main() {
+    console.log("main");
+    Init();
+    Iface();
+    
+//    n.InitBT();
 }
 
-//
-// Do it
-//
-Init();
-Iface();
-//dataIO.start();
+var test = function() {
+    console.log("test");
+};
 
-
+//Expose the constructor
+module.exports = test;
 
