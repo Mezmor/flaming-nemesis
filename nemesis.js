@@ -14,5 +14,6 @@ function Init() {
     winston.remove(winston.transports.Console);
 }
 
+cwd = __dirname;
 Init();
 Iface();

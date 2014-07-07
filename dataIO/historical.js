@@ -7,12 +7,14 @@ var winston = require("winston");
 var url = require('url');
 var http = require('http');
 var zlib = require('zlib');
+var path = require("path");
 
 // Constructor, we call EventEmitter's constructor because we subclass it
-var Historical = function(datafile, demon) {
+var Historical = function(opts, demon) {
     this.demon = demon;
-    this.data = datafile;
-    this.dateStr = config.backtest.startDate;
+    this.data = path.resolve("data/" + opts.datafile + ".csv").toString();
+    this.pullNew = opts.pullNew;
+    this.dateStr = opts.startDate;
     EventEmitter.call(this);
 };
 
@@ -28,7 +30,7 @@ Historical.prototype.start = function() {
     var startDate = new Date(d.shift(), parseInt(d.shift())-1, d.shift());
     
     // Pull new data file if we need to
-    if (config.backtest.pullNew || !fs.existsSync(this.data)) {
+    if (this.pullNew || !fs.existsSync(this.data)) {
         var dataURL = "http://api.bitcoincharts.com/v1/csv/" + 
             this.data.split("\\").pop().split("/").pop() + ".gz";
         this.downloadData(dataURL, startDate, this.read.bind(this));

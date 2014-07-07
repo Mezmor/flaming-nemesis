@@ -7,7 +7,7 @@ var DummyTrader = require("./trader/dummy");
 var config = require("./config");
 
 // constructor
-function Demon(temporality) {
+function Demon(temporality, opts) {
     this.runmode = {};
     this.dataIO = {};
     this.advisor = {};
@@ -24,7 +24,7 @@ function Demon(temporality) {
     };
     console.log("starting Demon");
     if (temporality === "bt") {
-        this.initBT();
+        this.initBT(opts);
     } else {
         // live
     }
@@ -62,12 +62,13 @@ Demon.prototype.setupDataEvents = function() {
 };
 
 //initialize everything for backtest
-Demon.prototype.initBT = function() {
+Demon.prototype.initBT = function(opts) {
     //
     // Instantiate the appropriate dataIO driver
     //
+        
     if (config.mode.data === "historical") {
-        this.dataIO = new Historical(config.datafile, this);
+        this.dataIO = new Historical(opts, this);
         console.log("DataIO instantiated: historical");
     } else {
         // Instantiate the live driver

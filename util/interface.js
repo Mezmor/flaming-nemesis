@@ -8,6 +8,7 @@ var readJson = require("read-package-json");
 var prompt = require("prompt");
 var charm = require("charm")();
 var sprintf = require("sprintf-js").sprintf;
+var config = require("../config");
 var Demon = require("../demon"); 
 
 // interactive interface
@@ -17,8 +18,8 @@ function Iface() {
         "bt" : {
             "commandFunc" : backtest,
             "commandDesc" : "backtest",
-            "commandOpts" : null,
-            "commandShort": null
+            "commandOpts" : {"pullNew" : Boolean},
+            "commandShort": {"n" : ["--pullNew"]}
         },
         "exit" : {
             "commandFunc" : quit,
@@ -72,7 +73,7 @@ function quit() {
     process.exit();
 }
 
-function help(cb) {
+function help(opts, cb) {
     console.log("Available commands:");
     for (var c in this.commandList) {
         console.log(sprintf("  %-10s\t%s", c, this.commandList[c].commandDesc));
@@ -80,26 +81,38 @@ function help(cb) {
     cb();
 }
 
-function backtest(cb) {
+function backtest(opts, cb) {
     console.log("backtest");
-    demon = new Demon("bt");
+    
+    // pull default opts
+    var btopts = config.backtest;
+    
+    // replace opts
+    var pn = opts["pullNew"];
+    if (pn) {
+        btopts.pullNew = pn;
+    }
+    
+    demon = new Demon("bt", btopts);
     cb();
 }
 
 function readCommand() {
-    console.log("");
     prompt.get([{properties : {command : {description : ">".green}}}],
         function(err, result) {
             if (err) {
                 console.log("input error!");
                 return;
             } else {
-                if (this.commandList[result.command]) {
-                    this.commandList[result.command].commandFunc.bind(this)(readCommand);
+                var cl = result.command.split(' ');
+                var cmd = cl[0];
+                if (this.commandList[cmd]) {
+                    var parsedOpts = nopt(this.commandList[cmd].commandOpts,this.commandList[cmd].commandShort,cl,1);
+                    this.commandList[cmd].commandFunc.bind(this)(parsedOpts, readCommand);
                 } else {
                     if (result.command) {
-                        console.log("unknown command " + result.command);
-                        help(readCommand);
+                        console.log("unknown command " + cmd);
+                        help({},readCommand);
                     } else {
                         readCommand();
                     }
