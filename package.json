@@ -4,14 +4,14 @@
 	"main": "nemesis.js",
 	"description": "A bitcoin trading bot for testing algorithms",
 	"dependencies": {
-		"lodash": "*",
-		"winston": "*",
-		"nopt": "*",
-		"read-package-json": "*",
-		"prompt": "*",
-		"charm": "*",
-		"cliff": "*",
-		"sprintf-js: "*"
+		"lodash":             "*",
+		"winston":            "*",
+		"nopt":               "*",
+		"read-package-json":  "*",
+		"prompt":             "*",
+		"charm":              "*",
+		"cliff":              "*",
+		"sprintf-js":         "*"
 	},
 	"repository": {
 		"type": "git",

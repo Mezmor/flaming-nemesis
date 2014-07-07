@@ -56,7 +56,6 @@ Demon.prototype.setupDataEvents = function() {
     //        console.log(candleType + ": " + candleHistories[candleType].length);
     //    }
         console.log(this.demon.candleHistories["1m"][this.demon.candleHistories["1m"].length - 1]);  // TODO remove debug code
-        console.log(this.demon.wallet);
         console.log("start $" + (config.dummyTrader.initialMoney + config.dummyTrader.initialAssets * this.demon.initprice));
         console.log("end $" + (this.demon.wallet.money + this.demon.wallet.assets * this.demon.candleHistories["1m"][this.demon.candleHistories["1m"].length - 1].close));
     });

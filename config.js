@@ -37,7 +37,7 @@ config.mode = backtest;
 // backtest-specific supplemental config options
 config.backtest = {
     pullNew : false,
-    startDate: "2013-12-01"
+    startDate: "2014-01-01"
 };
 
 // dummy trader options

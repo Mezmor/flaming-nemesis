@@ -3,7 +3,6 @@
 //var EventEmitter = require("events").EventEmitter;
 var config = require("../config");
 var winston = require("winston");
-var Nem = require("../nemesis");
 
 
 // Constructor, we call EventEmitter's constructor because we subclass it

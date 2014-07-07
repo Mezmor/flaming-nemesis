@@ -6,9 +6,11 @@ var config = require("../config");
 var winston = require("winston");
 var url = require('url');
 var http = require('http');
+var zlib = require('zlib');
 
 // Constructor, we call EventEmitter's constructor because we subclass it
-var Historical = function(datafile) {
+var Historical = function(datafile, demon) {
+    this.demon = demon;
     this.data = datafile;
     this.dateStr = config.backtest.startDate;
     EventEmitter.call(this);
@@ -28,7 +30,7 @@ Historical.prototype.start = function() {
     // Pull new data file if we need to
     if (config.backtest.pullNew || !fs.existsSync(this.data)) {
         var dataURL = "http://api.bitcoincharts.com/v1/csv/" + 
-            this.data.split("\\").pop().split("/").pop();
+            this.data.split("\\").pop().split("/").pop() + ".gz";
         this.downloadData(dataURL, startDate, this.read.bind(this));
     } else {
         this.read(startDate);
@@ -126,6 +128,7 @@ function initData(candle, currentTransaction) {
 // code from http://www.hacksparrow.com/using-node-js-to-download-files.html
 Historical.prototype.downloadData = function(file_url, startDate, cb) {
     winston.info("Downloading data file " + file_url);
+    console.log("Downloading data file " + file_url);
     var downloadDir = 'data/';
 
     // We will be downloading the files to a directory, so make sure it's there
@@ -149,12 +152,22 @@ Historical.prototype.downloadData = function(file_url, startDate, cb) {
     http.get(options, function(res) {
         res.on('data', function(data) {
                 file.write(data);
-            }).on('end', function() {
-                file.end();
-                winston.info(file_name + ' downloaded to ' + downloadDir);
+        }).on('end', function() {
+            file.end();
+            winston.info(file_name + ' downloaded to ' + downloadDir);
+            console.log(file_name + ' downloaded to ' + downloadDir);
+            console.log(downloadDir + file_name.split(".").slice(0,-1).join('.'));
+
+            zlib.unzip(fs.readFileSync(downloadDir + file_name), function(err, buffer) {
+                if (err) {
+                    console.log(err);
+                } else {
+                    fs.writeFileSync(downloadDir + file_name.split(".").slice(0,-1).join('.'), buffer);
+                }
                 cb(startDate);
-            });
+            });       
         });
+    });
     };
 };
 

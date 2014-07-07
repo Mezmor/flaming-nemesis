@@ -8,7 +8,7 @@ var readJson = require("read-package-json");
 var prompt = require("prompt");
 var charm = require("charm")();
 var sprintf = require("sprintf-js").sprintf;
-var Nemesis = require("nemesis");
+var Demon = require("../demon"); 
 
 // interactive interface
 function Iface() {
@@ -82,12 +82,12 @@ function help(cb) {
 
 function backtest(cb) {
     console.log("backtest");
-    Nemess.InitBT();
-    dataIO.start();
+    demon = new Demon("bt");
     cb();
 }
 
 function readCommand() {
+    console.log("");
     prompt.get([{properties : {command : {description : ">".green}}}],
         function(err, result) {
             if (err) {
