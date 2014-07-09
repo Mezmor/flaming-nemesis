@@ -1,6 +1,7 @@
 // demon.js
 //
 // file to bring together all the components
+var EventEmitter = require("events").EventEmitter;
 var Historical = require("./dataIO/historical");
 var Durin = require("./advisor/durin");
 var DummyTrader = require("./trader/dummy");
@@ -8,7 +9,6 @@ var config = require("./config");
 
 // constructor
 function Demon(temporality, opts) {
-    this.runmode = {};
     this.dataIO = {};
     this.advisor = {};
     this.trader = {};
@@ -22,6 +22,8 @@ function Demon(temporality, opts) {
         "4h" : [],
         "24h" : []
     };
+    
+    EventEmitter.call(this);
     console.log("starting Demon");
     if (temporality === "bt") {
         this.initBT(opts);
@@ -31,34 +33,47 @@ function Demon(temporality, opts) {
     this.dataIO.start();
 }
 
-//bind events to event handlers for data
+// Inherit EventEmitter's prototype
+Demon.prototype.__proto__ = EventEmitter.prototype;
+
+// setup event handlers for data
 Demon.prototype.setupDataEvents = function() {
-    this.dataIO.on("start", function() {
+
+    var startEvent = function() {
+//        console.log("start!");
     //    winston.info("start event caught");
-    }).on("new-data", function(currentTransaction) {
-        this.demon.transactions.push(currentTransaction);
-        if (this.demon.initprice == 0) {
-            this.demon.initprice = currentTransaction.price;
+    };
+    
+    var newDataEvent = function(currentTransaction) {
+        this.transactions.push(currentTransaction);
+        if (this.initprice == 0) {
+            this.initprice = currentTransaction.price;
         }
-        while (this.demon.transactions.length > 100) {
-            this.demon.transactions.shift();
+        while (this.transactions.length > 100) {
+            this.transactions.shift();
         }
-    }).on("candle", function(candle, type) {
+    };
+    
+    var candleEvent = function(candle, type) {
     //    winston.info("Found 1m candle: " + JSON.stringify(candle));
-        this.demon.candleHistories[type].push(candle);
-        while (this.demon.candleHistories[type].length > 100) {
-            this.demon.candleHistories[type].shift();
+        this.candleHistories[type].push(candle);
+        while (this.candleHistories[type].length > 100) {
+            this.candleHistories[type].shift();
         }
-        this.demon.trader.placeOrder(this.demon.advisor.advise(this.demon.candleHistories, type), type, this.demon.transactions, this.demon.wallet);
-    }).on("done", function() {
+        this.trader.placeOrder(this.advisor.advise(this.candleHistories, type), type, this.transactions, this.wallet);
+    };
+    
+    var doneEvent = function() {
         console.log("Completed reading data");
-    //    for ( var candleType in candleHistories) {
-    //        console.log(candleType + ": " + candleHistories[candleType].length);
-    //    }
-        console.log(this.demon.candleHistories["1m"][this.demon.candleHistories["1m"].length - 1]);  // TODO remove debug code
-        console.log("start $" + (config.dummyTrader.initialMoney + config.dummyTrader.initialAssets * this.demon.initprice));
-        console.log("end $" + (this.demon.wallet.money + this.demon.wallet.assets * this.demon.candleHistories["1m"][this.demon.candleHistories["1m"].length - 1].close));
-    });
+        console.log("start $" + (config.dummyTrader.initialMoney + config.dummyTrader.initialAssets * this.initprice));
+        console.log("end $" + (this.wallet.money + this.wallet.assets * this.candleHistories["1m"][this.candleHistories["1m"].length - 1].close));
+    };
+    
+    this.dataIO.on("start",
+        startEvent.bind(this)).on("new-data",
+        newDataEvent.bind(this)).on("candle",
+        candleEvent.bind(this)).on("done",
+        doneEvent.bind(this));
 };
 
 //initialize everything for backtest
@@ -66,9 +81,8 @@ Demon.prototype.initBT = function(opts) {
     //
     // Instantiate the appropriate dataIO driver
     //
-        
     if (config.mode.data === "historical") {
-        this.dataIO = new Historical(opts, this);
+        this.dataIO = new Historical(opts);
         console.log("DataIO instantiated: historical");
     } else {
         // Instantiate the live driver

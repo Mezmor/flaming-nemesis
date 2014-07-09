@@ -11,7 +11,8 @@
 		"prompt":             "*",
 		"charm":              "*",
 		"cliff":              "*",
-		"sprintf-js":         "*"
+		"sprintf-js":         "*",
+		"lazy":               "*"
 	},
 	"repository": {
 		"type": "git",

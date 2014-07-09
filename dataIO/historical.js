@@ -8,20 +8,16 @@ var url = require('url');
 var http = require('http');
 var zlib = require('zlib');
 var path = require("path");
+var Lazy = require("lazy");
 
 // Constructor, we call EventEmitter's constructor because we subclass it
-var Historical = function(opts, demon) {
-    this.demon = demon;
+var Historical = function(opts) {
     this.data = path.resolve("data/" + opts.datafile + ".csv").toString();
     this.pullNew = opts.pullNew;
     this.dateStr = opts.startDate;
-    EventEmitter.call(this);
 };
 
-// Inherit EventEmitter's prototype
-Historical.prototype.__proto__ = EventEmitter.prototype;
-
-Historical.prototype.start = function() {
+Historical.prototype.start = function() {    
     // Begin reading data
     this.emit("start"); // Test emit
     
@@ -35,14 +31,18 @@ Historical.prototype.start = function() {
             this.data.split("\\").pop().split("/").pop() + ".gz";
         this.downloadData(dataURL, startDate, this.read.bind(this));
     } else {
-        this.read(startDate);
+        this.read.call(this,startDate);
     }
+    EventEmitter.call(this);
 };
+
+// Inherit EventEmitter's prototype
+Historical.prototype.__proto__ = EventEmitter.prototype;
 
 // Assumes the data to be structured as: (time, price, volume)
 Historical.prototype.read = function(startDate) {
     winston.info("Using data file " + this.data);
-    var array = fs.readFileSync(this.data).toString().split('\n');
+    console.log("Using data file " + this.data);
 
     // Candles are: (1m [60s], 15m [900s], 1h [3600s], 4h [14400s], 24h
     // [86400s])
@@ -55,20 +55,24 @@ Historical.prototype.read = function(startDate) {
         "24h" : {}
     };
     
-    for (var i = 0; i < array.length; i++) {
-        var line = array[i].split(",");
+    var l = 0;
+    var readLine = function(line) {
+
+        process.stdout.write(++l + "\033[0G");
+        
+        var lineA = line.toString().split(',');
         var currentTransaction = {
-            "time" : parseInt(line[0]),
-            "price" : parseFloat(line[1]),
-            "volume" : parseFloat(line[2])
+            "time" : parseInt(lineA[0]),
+            "price" : parseFloat(lineA[1]),
+            "volume" : parseFloat(lineA[2])
         };
         
         if (currentTransaction.time * 1000 < startDate.getTime()) {
-            continue;
+            return;
         }
         
         // Update each candle
-        for ( var candleType in candles) {
+        for (var candleType in candles) {
             var candle = candles[candleType];
             
             if (!candle.start) {
@@ -114,8 +118,13 @@ Historical.prototype.read = function(startDate) {
             }
         }
         this.emit("new-data", currentTransaction);
-    }
-    this.emit("done");
+    };
+    
+    var endLine = function() {
+        this.emit("done");
+    };
+    
+    new Lazy(fs.createReadStream(this.data)).lines.forEach(readLine.bind(this)).on("pipe", endLine.bind(this));
 };
 
 // Initialize a candle with the currentTransaction
@@ -150,15 +159,20 @@ Historical.prototype.downloadData = function(file_url, startDate, cb) {
 
     var file_name = url.parse(file_url).pathname.split('/').pop();
     var file = fs.createWriteStream(downloadDir + file_name);
-
+    var bytesDownloaded = 0;
+    
     http.get(options, function(res) {
         res.on('data', function(data) {
-                file.write(data);
+            bytesDownloaded += data.length;
+            process.stdout.write(Math.round(bytesDownloaded / 1000).toString() + "KB dl'd\033[0G");
+            file.write(data);
         }).on('end', function() {
+            console.log("");
             file.end();
-            winston.info(file_name + ' downloaded to ' + downloadDir);
-            console.log(file_name + ' downloaded to ' + downloadDir);
-            console.log(downloadDir + file_name.split(".").slice(0,-1).join('.'));
+            winston.info(file_name + ' downloaded to ' + downloadDir
+                + file_name);
+            console.log(file_name + ' downloaded to ' + downloadDir
+                + file_name + ' upzipping...');
 
             zlib.unzip(fs.readFileSync(downloadDir + file_name), function(err, buffer) {
                 if (err) {
@@ -166,6 +180,7 @@ Historical.prototype.downloadData = function(file_url, startDate, cb) {
                 } else {
                     fs.writeFileSync(downloadDir + file_name.split(".").slice(0,-1).join('.'), buffer);
                 }
+                console.log('Unzipped to ' + downloadDir + file_name.split(".").slice(0,-1).join('.'));
                 cb(startDate);
             });       
         });
