@@ -1,7 +1,6 @@
 // Gandalf ain't got shit on me.
 
 //var EventEmitter = require("events").EventEmitter;
-var config = require("../config");
 var winston = require("winston");
 var Math = require("../util/math");
 

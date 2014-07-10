@@ -1,12 +1,11 @@
 // This trader just assumes that we were able to buy or sell at the last
 // transaction price +/- an inefficiency factor
 //var EventEmitter = require("events").EventEmitter;
-var config = require("../config");
 var winston = require("winston");
 
 
 // Constructor, we call EventEmitter's constructor because we subclass it
-var DummyTrader = function() {
+var DummyTrader = function(config) {
     this.tradePercentages = config.dummyTrader.tradePercentages;
     this.reservePercentage = config.dummyTrader.assetReservePercentage;
     this.fee = config.dummyTrader.fee;

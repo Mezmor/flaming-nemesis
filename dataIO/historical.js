@@ -12,10 +12,10 @@ var Lazy = require("lazy");
 var util = require("util");
 
 // Constructor, we call EventEmitter's constructor because we subclass it
-var Historical = function(opts) {
-    this.data = path.resolve("data/" + opts.datafile + ".csv").toString();
-    this.pullNew = opts.pullNew;
-    this.dateStr = opts.startDate;
+var Historical = function(config) {
+    this.data = path.resolve("data/" + config.backtestSettings.datafile + ".csv").toString();
+    this.pullNew = config.backtestSettings.pullNew;
+    this.dateStr = config.backtestSettings.startDate;
 };
 
 Historical.prototype.start = function() {    

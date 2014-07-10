@@ -8,7 +8,7 @@ var readJson = require("read-package-json");
 var prompt = require("prompt");
 var charm = require("charm")();
 var sprintf = require("sprintf-js").sprintf;
-var config = require("../config");
+var Config = require("../config");
 var Demon = require("../demon"); 
 
 // interactive interface
@@ -85,15 +85,15 @@ function backtest(opts, cb) {
     console.log("backtest");
     
     // pull default opts
-    var btopts = config.backtest;
+    var config = new Config();
     
     // replace opts
     var pn = opts["pullNew"];
     if (pn) {
-        btopts.pullNew = pn;
+        config.backtestSettings.pullNew = pn;
     }
     
-    demon = new Demon("bt", btopts);
+    demon = new Demon("bt", config);
     cb();
 }
 

@@ -5,10 +5,10 @@ var EventEmitter = require("events").EventEmitter;
 var Historical = require("./dataIO/historical");
 var Durin = require("./advisor/durin");
 var DummyTrader = require("./trader/dummy");
-var config = require("./config");
 
 // constructor
-function Demon(temporality, opts) {
+function Demon(temporality, config) {
+    this.config = config;
     this.dataIO = {};
     this.advisor = {};
     this.trader = {};
@@ -26,7 +26,7 @@ function Demon(temporality, opts) {
     EventEmitter.call(this);
     console.log("starting Demon");
     if (temporality === "bt") {
-        this.initBT(opts);
+        this.initBT(config);
     } else {
         // live
     }
@@ -65,7 +65,7 @@ Demon.prototype.setupDataEvents = function() {
     
     var doneEvent = function() {
         console.log("Completed reading data");
-        console.log("start $" + (config.dummyTrader.initialMoney + config.dummyTrader.initialAssets * this.initprice));
+        console.log("start $" + (this.config.dummyTrader.initialMoney + this.config.dummyTrader.initialAssets * this.initprice));
         console.log("end $" + (this.wallet.money + this.wallet.assets * this.candleHistories["1m"][this.candleHistories["1m"].length - 1].close));
     };
     
@@ -77,12 +77,12 @@ Demon.prototype.setupDataEvents = function() {
 };
 
 //initialize everything for backtest
-Demon.prototype.initBT = function(opts) {
+Demon.prototype.initBT = function(config) {
     //
     // Instantiate the appropriate dataIO driver
     //
     if (config.mode.data === "historical") {
-        this.dataIO = new Historical(opts);
+        this.dataIO = new Historical(config);
         console.log("DataIO instantiated: historical");
     } else {
         // Instantiate the live driver
@@ -103,7 +103,7 @@ Demon.prototype.initBT = function(opts) {
     // Instantiate the appropriate trader
     //
     if (config.mode.trader === "dummyTrader") {
-        this.trader = new DummyTrader();
+        this.trader = new DummyTrader(config);
         this.wallet.money = config.dummyTrader.initialMoney;
         this.wallet.assets = config.dummyTrader.initialAssets;
         console.log("Trader instantiated: Dummy");
