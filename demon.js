@@ -65,8 +65,10 @@ Demon.prototype.setupDataEvents = function() {
     
     var doneEvent = function() {
         console.log("Completed reading data");
-        console.log("start $" + (this.config.dummyTrader.initialMoney + this.config.dummyTrader.initialAssets * this.initprice));
-        console.log("end $" + (this.wallet.money + this.wallet.assets * this.candleHistories["1m"][this.candleHistories["1m"].length - 1].close));
+        if (this.candleHistories["1m"].length > 0) {
+            console.log("start $" + (this.config.dummyTrader.initialMoney + this.config.dummyTrader.initialAssets * this.initprice));
+            console.log("end $" + (this.wallet.money + this.wallet.assets * this.candleHistories["1m"][this.candleHistories["1m"].length - 1].close));
+        }
     };
     
     this.dataIO.on("start",

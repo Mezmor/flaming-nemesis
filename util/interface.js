@@ -18,8 +18,16 @@ function Iface() {
         "bt" : {
             "commandFunc" : backtest,
             "commandDesc" : "backtest",
-            "commandOpts" : {"pullNew" : Boolean},
-            "commandShort": {"n" : ["--pullNew"]}
+            "commandOpts" : {
+                                "pull-new"      : Boolean,
+                                "start-date"    : [String, null],
+                                "exchange"      : [String, null]
+                            },
+            "commandShort": {
+                                "n" : ["--pull-new"],
+                                "s" : ["--start-date"],
+                                "e" : ["--exchange"]
+                            }
         },
         "exit" : {
             "commandFunc" : quit,
@@ -88,9 +96,17 @@ function backtest(opts, cb) {
     var config = new Config();
     
     // replace opts
-    var pn = opts["pullNew"];
+    var pn = opts["pull-new"];
     if (pn) {
         config.backtestSettings.pullNew = pn;
+    }
+    var sd = opts["start-date"];
+    if (sd) {
+        config.backtestSettings.startDate = sd;
+    }
+    var e = opts["exchange"];
+    if (e) {
+        config.backtestSettings.exchange = e;
     }
     
     demon = new Demon("bt", config);

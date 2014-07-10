@@ -2,7 +2,6 @@
 // Driver responsible for reading historical transaction data and building variable length candles
 var EventEmitter = require("events").EventEmitter;
 var fs = require("fs");
-var config = require("../config");
 var winston = require("winston");
 var url = require('url');
 var http = require('http');
@@ -13,7 +12,7 @@ var util = require("util");
 
 // Constructor, we call EventEmitter's constructor because we subclass it
 var Historical = function(config) {
-    this.data = path.resolve("data/" + config.backtestSettings.datafile + ".csv").toString();
+    this.data = path.resolve("data/" + config.backtestSettings.exchange + ".csv").toString();
     this.pullNew = config.backtestSettings.pullNew;
     this.dateStr = config.backtestSettings.startDate;
 };

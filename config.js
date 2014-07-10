@@ -35,7 +35,7 @@ function Config() {
      this.backtestSettings = {
          pullNew : false,
          startDate : "2014-01-01",
-         datafile : "mtgoxRUB"
+         exchange : "mtgoxRUB"
      };
     
      // dummy trader options
