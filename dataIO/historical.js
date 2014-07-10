@@ -9,6 +9,7 @@ var http = require('http');
 var zlib = require('zlib');
 var path = require("path");
 var Lazy = require("lazy");
+var util = require("util");
 
 // Constructor, we call EventEmitter's constructor because we subclass it
 var Historical = function(opts) {
@@ -151,40 +152,43 @@ Historical.prototype.downloadData = function(file_url, startDate, cb) {
 
     // Function to download file using HTTP.get
     var download_file_httpget = function(file_url) {
-    var options = {
-        host: url.parse(file_url).host,
-        port: 80,
-        path: url.parse(file_url).pathname
-    };
-
-    var file_name = url.parse(file_url).pathname.split('/').pop();
-    var file = fs.createWriteStream(downloadDir + file_name);
-    var bytesDownloaded = 0;
+        var options = {
+            host: url.parse(file_url).host,
+            port: 80,
+            path: url.parse(file_url).pathname
+        };
     
-    http.get(options, function(res) {
-        res.on('data', function(data) {
-            bytesDownloaded += data.length;
-            process.stdout.write(Math.round(bytesDownloaded / 1000).toString() + "KB dl'd\033[0G");
-            file.write(data);
-        }).on('end', function() {
-            console.log("");
-            file.end();
-            winston.info(file_name + ' downloaded to ' + downloadDir
-                + file_name);
-            console.log(file_name + ' downloaded to ' + downloadDir
-                + file_name + ' upzipping...');
+        var bytesDownloaded = 0;
+        var file_name = url.parse(file_url).pathname.split('/').pop();
+        var file = fs.createWriteStream(downloadDir + file_name);
+        
+        file.on('finish', function() {
+            file.close(function() {
+                winston.info(file_name + ' downloaded to ' + downloadDir
+                    + file_name);
+                console.log('\n' + file_name + ' downloaded to ' + downloadDir
+                    + file_name + ' upzipping...');
 
-            zlib.unzip(fs.readFileSync(downloadDir + file_name), function(err, buffer) {
-                if (err) {
-                    console.log(err);
-                } else {
-                    fs.writeFileSync(downloadDir + file_name.split(".").slice(0,-1).join('.'), buffer);
-                }
-                console.log('Unzipped to ' + downloadDir + file_name.split(".").slice(0,-1).join('.'));
-                cb(startDate);
-            });       
+                zlib.unzip(fs.readFileSync(downloadDir + file_name), function(err, buffer) {
+                    if (err) {
+                        console.log(err);
+                    } else {
+                        fs.writeFileSync(downloadDir + file_name.split(".").slice(0,-1).join('.'), buffer);
+                        console.log(Math.round(buffer.length / 1000).toString()
+                            + 'KB unzipped to ' + downloadDir + file_name.split(".").slice(0,-1).join('.'));
+                        cb(startDate);
+                    }
+                });       
+            });
         });
-    });
+        
+        http.get(options, function(res) {
+            res.on('data', function(data) {
+                bytesDownloaded += data.length;
+                process.stdout.write(Math.round(bytesDownloaded / 1000).toString() + "KB dl'd\033[0G");
+            });
+            res.pipe(file);
+        }); 
     };
 };
 
