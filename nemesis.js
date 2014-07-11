@@ -1,7 +1,7 @@
 // nemesis.js
 // The main handler for all things Balrog
 var winston = require("winston");
-var Iface = require("./util/interface");
+var Iface = require("./util/iface");
 
 // initialize nemesis
 function Init() {

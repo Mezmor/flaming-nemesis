@@ -7,8 +7,9 @@ var Durin = require("./advisor/durin");
 var DummyTrader = require("./trader/dummy");
 
 // constructor
-function Demon(temporality, config) {
+function Demon(temporality, config, i) {
     this.config = config;
+    this.i = i;
     this.dataIO = {};
     this.advisor = {};
     this.trader = {};
@@ -24,7 +25,7 @@ function Demon(temporality, config) {
     };
     
     EventEmitter.call(this);
-    console.log("starting Demon");
+    i.print('starting demon', 'console');
     if (temporality === "bt") {
         this.initBT(config);
     } else {
@@ -38,7 +39,6 @@ Demon.prototype.__proto__ = EventEmitter.prototype;
 
 // setup event handlers for data
 Demon.prototype.setupDataEvents = function() {
-
     var startEvent = function() {
 //        console.log("start!");
     //    winston.info("start event caught");

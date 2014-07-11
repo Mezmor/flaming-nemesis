@@ -5,7 +5,7 @@ var winston = require("winston");
 
 
 // Constructor, we call EventEmitter's constructor because we subclass it
-var DummyTrader = function(config) {
+function DummyTrader(config) {
     this.tradePercentages = config.dummyTrader.tradePercentages;
     this.reservePercentage = config.dummyTrader.assetReservePercentage;
     this.fee = config.dummyTrader.fee;
@@ -70,8 +70,8 @@ DummyTrader.prototype.placeOrder = function(action, timeLen, transactions, walle
                 console.log([wallet.money, wallet.assets]);
             }
         }
-
         break;
+        
     case "sell":
         // calculate how many coins we want to sell
         var coins = (wallet.assets - this.heldAssets) * (1 - this.reservePercentage)
@@ -104,6 +104,7 @@ DummyTrader.prototype.placeOrder = function(action, timeLen, transactions, walle
             }
         }
         break;
+        
     case "hold":
         break;
     }

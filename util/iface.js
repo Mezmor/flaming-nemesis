@@ -1,4 +1,4 @@
-// interface.js
+// iface.js
 //
 // Command line interface for nemesis
 // Prompts user interactively for commands and does them, supplying output
@@ -9,7 +9,7 @@ var prompt = require("prompt");
 var charm = require("charm")();
 var sprintf = require("sprintf-js").sprintf;
 var Config = require("../config");
-var Demon = require("../demon"); 
+var Demon = require("../demon");
 
 // interactive interface
 function Iface() {
@@ -55,15 +55,84 @@ function Iface() {
         },
     };
     
+    this.print = print.bind(this);
+    this.consoleM = ["1", "2", "3"];
+    
     // setup interface
     charm.pipe(process.stdout);
+    charm.reset();
     prompt.message = "";
     prompt.delimiter = "";
     prompt.start();
     
     // go
+    drawScreen.apply(this);
     readCommand();
 }
+
+function print(m, type) {
+    switch (type) {
+    case 'console':
+        // console messages tab
+        this.consoleM.push(m);
+        break;
+            
+    case 'trade':
+        // our trades
+        break;
+        
+    case 'market':
+        // market's trades
+        break;
+        
+    case 'bkgd':
+        // background tasks
+    }
+};
+
+// redraw the screen
+function drawScreen() {
+    // draw status area
+    charm.position(0,0);
+    charm.background('yellow');
+    charm.foreground('black');
+    charm.write("status\n");
+    charm.write("status\n");
+    charm.write("status\n");
+    // draw tab
+    charm.position(0, 5);
+    charm.background('black');
+    charm.foreground('white');
+    this.consoleM.forEach(function(l) { charm.write(l + '\n');});
+    
+    // draw command area
+    charm.position(0, process.stdout.rows);
+}
+
+// read and execute user command
+function readCommand() {
+    prompt.get([{properties : {command : {description : ">".green}}}],
+        function(err, result) {
+            if (err) {
+                console.log("input error!");
+                return;
+            } else {
+                var cl = result.command.split(' ');
+                var cmd = cl[0];
+                if (this.commandList[cmd]) {
+                    var parsedOpts = nopt(this.commandList[cmd].commandOpts,this.commandList[cmd].commandShort,cl,1);
+                    this.commandList[cmd].commandFunc.call(this, parsedOpts, readCommand);
+                } else {
+                    if (result.command) {
+                        console.log("unknown command " + cmd);
+                        help({}, readCommand);
+                    } else {
+                        readCommand();
+                    }
+                }
+            }
+        });
+};
 
 // Print version
 function version(cb) {
@@ -109,32 +178,8 @@ function backtest(opts, cb) {
         config.backtestSettings.exchange = e;
     }
     
-    demon = new Demon("bt", config);
+    demon = new Demon("bt", config, this);
     cb();
-}
-
-function readCommand() {
-    prompt.get([{properties : {command : {description : ">".green}}}],
-        function(err, result) {
-            if (err) {
-                console.log("input error!");
-                return;
-            } else {
-                var cl = result.command.split(' ');
-                var cmd = cl[0];
-                if (this.commandList[cmd]) {
-                    var parsedOpts = nopt(this.commandList[cmd].commandOpts,this.commandList[cmd].commandShort,cl,1);
-                    this.commandList[cmd].commandFunc.bind(this)(parsedOpts, readCommand);
-                } else {
-                    if (result.command) {
-                        console.log("unknown command " + cmd);
-                        help({},readCommand);
-                    } else {
-                        readCommand();
-                    }
-                }
-            }
-        });
 }
 
 module.exports = Iface;
